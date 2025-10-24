@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -20,6 +19,15 @@ jobs:
         run: |
           unzip -q PopByteHPPApp.zip -d src
           echo "APP_DIR=src" >> $GITHUB_ENV
+          ls -la src
+
+      # ⬇️ Generate folder android terbaru (v2 embedding) tanpa menyentuh lib/ dll
+      - name: Generate modern Android folder
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          flutter --version || true
+          # Buat skeleton platform Android (tidak overwrite lib/)
+          flutter create . --platforms=android --org com.popbyte --project-name popbyte_hpp_app --no-pub --overwrite
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
