@@ -22,17 +22,28 @@ jobs:
           echo "APP_DIR=src" >> $GITHUB_ENV
           ls -la src
 
-      # 🟡 Pasang Flutter dulu
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.2'
 
-      # 🟢 Baru generate folder Android v2 embedding
-      - name: Generate modern Android folder
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 🔧 Buat project sementara HANYA untuk mengambil folder android v2
+      #    (tidak menyentuh lib/ & pubspec.yaml milik kita)
+      - name: Generate Android folder ONLY (keep our lib)
         working-directory: ${{ env.APP_DIR }}
         run: |
-          flutter create . --platforms=android --org com.popbyte --project-name popbyte_hpp_app --no-pub --overwrite
+          rm -rf android
+          flutter create --platforms=android --org com.popbyte --project-name popbyte_hpp_app temp_android
+          mv temp_android/android ./android
+          rm -rf temp_android
+          # opsional: pastikan minSdkVersion aman
+          sed -i 's/minSdkVersion [0-9][0-9]*/minSdkVersion 21/' android/app/build.gradle || true
 
       - name: Get dependencies
         working-directory: ${{ env.APP_DIR }}
