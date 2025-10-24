@@ -8,35 +8,33 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Ensure unzip
+      - name: Install unzip
         run: sudo apt-get update && sudo apt-get install -y unzip
 
-      - name: Unzip project
+      - name: Unzip PopByteHPPApp.zip
         run: |
-          mkdir src
           unzip -q PopByteHPPApp.zip -d src
-          # Cari folder yang berisi pubspec.yaml
-          APP_DIR=$(dirname "$(find src -name pubspec.yaml | head -n 1)")
-          echo "APP_DIR=$APP_DIR" >> $GITHUB_ENV
+          echo "APP_DIR=src" >> $GITHUB_ENV
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.2'
 
-      - name: Flutter pub get
+      - name: Get dependencies
         working-directory: ${{ env.APP_DIR }}
         run: flutter pub get
 
-      - name: Build APK (debug)
+      - name: Build debug APK
         working-directory: ${{ env.APP_DIR }}
         run: flutter build apk --debug
 
-      - name: Upload APK Artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: PopByteHPP-debug-apk
